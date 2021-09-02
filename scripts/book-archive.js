@@ -2,23 +2,23 @@ const searchBox = document.getElementById('searchBox')
 const searchButton = document.getElementById('searchButton')
 const booksListDiv = document.getElementById('booksListDiv')
 const loaderDiv = document.getElementById('loaderDiv')
-const noResult = document.getElementById('noResult')
-
+const noResultDiv = document.getElementById('noResultDiv')
+const totalSearchDiv = document.getElementById('totalSearchDiv')
 
 document.getElementById('searchButton').addEventListener('click', searchBooks)
 
-
-
 function searchBooks() {
     let searchText = searchBox.value
-    setLoader(1)
-    setSearchSection(0)
     clearResult()
+    setSearchSection(0)
+    setLoader(1)
     fetch(`https://openlibrary.org/search.json?q=${searchText}`)
         .then(res => res.json())
         .then(data => {
-            if (data.docs.length) {
+            let searchResultCount = data.docs.length
+            if (searchResultCount) {
                 data.docs.forEach(book => getBooks(book))
+                getTotalSearch(searchResultCount)
             }
             else {
                 setValidation(searchText)
@@ -27,7 +27,6 @@ function searchBooks() {
         .finally(() => {
             setLoader(0)
             setSearchSection(1)
-
         })
 }
 
@@ -88,10 +87,12 @@ const showBooks = (bookName, authorName, publisher, firstPublish, cover_i) => {
 const setLoader = action => {
     action ? loaderDiv.classList.toggle('d-none') : loaderDiv.classList.toggle('d-none', true)
 }
+
 const clearResult = () => {
     searchBox.value = ''
     booksListDiv.textContent = ''
-    noResult.textContent = ''
+    noResultDiv.textContent = ''
+    totalSearchDiv.textContent = ''
 }
 
 const setSearchSection = action => {
@@ -99,9 +100,13 @@ const setSearchSection = action => {
     action ? searchButton.classList.toggle('disabled') : searchButton.classList.toggle('disabled', true)
 }
 
-const setValidation = (searchProvided) => {
-    noResult.innerHTML = `
+const setValidation = searchText => {
+    noResultDiv.innerHTML = `
     <span class="h3 text-danger fw-bold">No results found.</span>
-    <a class="ms-1 h3 text-info" href="/search/inside?q=${searchProvided}">Search for books containing the phrase "${searchProvided}"?</a>
+    <a class="ms-1 h3 text-info" href="/search/inside?q=${searchText}">Search for books containing the phrase "${searchText}"?</a>
     `
+}
+
+const getTotalSearch = (totatBooks) => {
+    totalSearchDiv.innerHTML = `<h3 class="text-info fw-bolder">Total Books Found <span class="fw-bold fs-2">${totatBooks}</span></h3>`
 }
