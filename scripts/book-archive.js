@@ -32,50 +32,36 @@ function searchBooks() {
 }
 
 const getBooks = singleBook => {
-    let bookName = singleBook.title_suggest ? singleBook.subtitle
-        ? `${singleBook.title_suggest} -${singleBook.subtitle}` : `${singleBook.title_suggest}`
-        : singleBook.subtitle
-            ? `${singleBook.subtitle}` : 'Unknown Book Name'
+    let { title_suggest, subtitle, author_name, publisher, first_publish_year, cover_i: cover_image } = singleBook
+    let bookName = title_suggest ? subtitle
+        ? `${title_suggest} -${subtitle}` : `${title_suggest}`
+        : subtitle
+            ? `${subtitle}` : 'Unknown Book Name'
 
-    let authorName = singleBook.author_name != undefined
-        ? `${singleBook.author_name[0]}` : 'Unknown Author'
+    let authorName = author_name != undefined
+        ? `${author_name[0]}` : 'Unknown Author'
 
-    let publisher = singleBook.publisher != undefined
-        ? `${singleBook?.publisher[0]}` : ''
+    let publisherName = publisher != undefined
+        ? `${publisher[0]}` : ''
 
-    let firstPublish = singleBook.first_publish_year != undefined
-        ? `${singleBook?.first_publish_year}` : ''
+    let firstPublish = first_publish_year != undefined
+        ? `${first_publish_year}` : ''
 
-    let coverImageMedium = singleBook.cover_i != undefined
-        ? `${singleBook.cover_i}` : ''
+    let coverImageMedium = cover_image != undefined
+        ? `${cover_image}` : ''
 
-    showBooks(bookName, authorName, publisher, firstPublish, coverImageMedium)
+    showBooks(bookName, authorName, publisherName, firstPublish, coverImageMedium)
 }
 
 const showBooks = (bookName, authorName, publisher, firstPublish, cover_i) => {
     let coverImageSrc = `https://covers.openlibrary.org/b/id/${cover_i}-M.jpg`
-    let colDiv = document.createElement('div')
-
     if (!cover_i) {
         coverImageSrc = `https://openlibrary.org/images/icons/avatar_book-sm.png`
     }
-    if (!firstPublish) {
-        colDiv.innerHTML = `
-        <div class="card h-100 bg-light p-1 shadow-lg">
-            <img src="${coverImageSrc}" class="coverImageMedium img-thumbnail card-img-top mx-auto" 
-            alt="images not found" title="${bookName}">
-                <div class="card-body">
-                    <h5 class="card-title fw-bold">${bookName}</h5>
-                    <p>by
-                        <span class='ms-1 fs-5 fst-italic'>${authorName}</span>
-                    </p>
-                    <p>Publisher ${publisher}</p>
-                </div>
-        </div>
+    let colDiv = document.createElement('div')
+
+    colDiv.innerHTML =
         `
-    }
-    else {
-        colDiv.innerHTML = `
         <div class="card h-100 bg-light p-1 shadow-lg">
             <img src="${coverImageSrc}" class="coverImageMedium img-thumbnail card-img-top mx-auto" 
             alt="No Image" title="${bookName}">
@@ -84,13 +70,18 @@ const showBooks = (bookName, authorName, publisher, firstPublish, cover_i) => {
                     <p>by
                         <span class='ms-1 fs-5 fst-italic'>${authorName}</span>
                     </p>
-                    <p class="text-muted">
-                        <small>First published in ${firstPublish} ${publisher ? `by ${publisher}` : ``}</small>
+                    <p>
+                        <small class="text-muted"> 
+            ${firstPublish
+            ? publisher
+                ? `First published in ${firstPublish} by ${publisher} ` : `First published in ${firstPublish}`
+            : publisher
+                ? `Publisher: ${publisher}` : ``}
+                        </small>
                     </p>
                 </div>
         </div>
-        `
-    }
+       `
     booksListDiv.appendChild(colDiv)
 }
 
