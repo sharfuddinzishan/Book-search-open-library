@@ -1,5 +1,9 @@
 const searchBox = document.getElementById('searchBox')
+const searchButton = document.getElementById('searchButton')
 const booksListDiv = document.getElementById('booksListDiv')
+const loaderDiv = document.getElementById('loaderDiv')
+const noResult = document.getElementById('noResult')
+
 
 document.getElementById('searchButton').addEventListener('click', searchBooks)
 
@@ -7,55 +11,89 @@ document.getElementById('searchButton').addEventListener('click', searchBooks)
 
 function searchBooks() {
     searchText = searchBox.value
-
+    setLoader(1)
+    setSearchSection(0)
+    clearResult()
     fetch(`https://openlibrary.org/search.json?q=${searchText}`)
         .then(res => res.json())
-        .then(data => getBooks(data.docs))
+        .then(data => {
+            if (data.docs.length) {
+                data.docs.forEach(book => getBooks(book))
+            }
+            else {
+                setValidation()
+            }
+        })
+        .finally(() => {
+            setLoader(0)
+            setSearchSection(1)
+
+        })
 }
 
-const getBooks = booksArray => {
-    console.log(booksArray.length)
-    for (let book of booksArray) {
-        let bookName = book.title_suggest ? book.subtitle
-            ? `${book.title_suggest} -${book.subtitle}` : `${book.title_suggest}`
-            : book.subtitle
-                ? `${book.subtitle}` : 'Unknown Name'
+const getBooks = singleBook => {
+    let bookName = singleBook.title_suggest ? singleBook.subtitle
+        ? `${singleBook.title_suggest} -${singleBook.subtitle}` : `${singleBook.title_suggest}`
+        : singleBook.subtitle
+            ? `${singleBook.subtitle}` : 'Unknown Book Name'
 
-        let authorName = book.author_name != undefined
-            ? `${book.author_name[0]}` : 'Unknown Author'
+    let authorName = singleBook.author_name != undefined
+        ? `${singleBook.author_name[0]}` : 'Unknown Author'
 
-        let publisher = book.publisher != undefined
-            ? `${book?.publisher[0]}` : 'Unknown Publisher'
+    let publisher = singleBook.publisher != undefined
+        ? `${singleBook?.publisher[0]}` : 'Unknown Publisher'
 
-        let firstPublish = book.first_publish_year != undefined
-            ? `${book?.first_publish_year}` : 'N/A'
+    let firstPublish = singleBook.first_publish_year != undefined
+        ? `${singleBook?.first_publish_year}` : 'N/A'
 
-        let coverImageMed = book.cover_i != undefined
-            ? `${book.cover_i}` : ''
+    let coverImageMedium = singleBook.cover_i != undefined
+        ? `${singleBook.cover_i}` : ''
 
-        showBooks(bookName, authorName, publisher, firstPublish, coverImageMed)
-        // console.log(`Book Name: ${bookName}, Author Name: ${authorName}, Publisher: ${publisher}, Published: ${firstPublish} `)
-    }
+    showBooks(bookName, authorName, publisher, firstPublish, coverImageMedium)
 }
 
 const showBooks = (bookName, authorName, publisher, firstPublish, cover_i) => {
-    let colDiv = document.createElement('div')
     let coverImageSrc = `https://covers.openlibrary.org/b/id/${cover_i}-M.jpg`
     if (!cover_i) {
         coverImageSrc = `https://openlibrary.org/images/icons/avatar_book-sm.png`
     }
+    let colDiv = document.createElement('div')
     colDiv.innerHTML = `
-    <div class="card h-100">
-        <img src="${coverImageSrc}" class="coverImageMedium img-thumbnail card-img-top" 
+    <div class="card h-100 bg-light p-1 shadow-lg">
+        <img src="${coverImageSrc}" class="coverImageMedium img-thumbnail card-img-top mx-auto" 
         alt="images not found" title="${bookName}">
             <div class="card-body">
-                <h5 class="card-title">${bookName}</h5>
-                <p>${authorName}</p>
+                <h5 class="card-title fw-bold">${bookName}</h5>
+                <p>by
+                    <span class='ms-1 fs-5 fst-italic'>${authorName}</span>
+                </p>
+                <p class="text-muted">
+                    <small>First published in ${firstPublish}</small>
+                </p>
                 <p>${publisher}</p>
-                <p>${firstPublish}</p>
             </div>
     </div>
     `
     booksListDiv.appendChild(colDiv)
 }
 
+const setLoader = action => {
+    action ? loaderDiv.classList.toggle('d-none') : loaderDiv.classList.toggle('d-none', true)
+}
+const clearResult = () => {
+    searchBox.value = ''
+    booksListDiv.textContent = ''
+    noResult.textContent = ''
+}
+
+const setSearchSection = action => {
+    action ? searchBox.toggleAttribute('readonly') : searchBox.toggleAttribute('readonly', true)
+    action ? searchButton.classList.toggle('disabled') : searchButton.classList.toggle('disabled', true)
+}
+
+const setValidation = () => {
+    noResult.innerHTML = `
+    <span class="h3 text-danger fw-bold">No results found.</span>
+    <a class="ms-1 h3 text-info" href="/search/inside?q=${searchText}">Search for books containing the phrase "${searchText}"?</a>
+    `
+}
