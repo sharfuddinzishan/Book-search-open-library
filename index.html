@@ -16,9 +16,11 @@
 <body>
 
     <div class="container p-3">
+        <!-- SerachBar Section  -->
         <section id="searchSection" class="my-2">
             <div class="row">
                 <div class="col-10 col-sm-6 mx-auto">
+                    <h2 class="text-success fw-bold p-3">Search Your Desired Books</h2>
                     <div class="input-group">
                         <input type="text" class=" form-control" placeholder="Search Books Here......" id="searchBox">
                         <button class="btn btn-info rounded-end text-light fw-bold" type="button"
@@ -27,11 +29,14 @@
                 </div>
             </div>
         </section>
+        <!-- Result Validation Section  -->
         <section id="validationSection">
             <div id="noResultDiv" class="d-flex flex-column flex-md-row justify-content-center align-items-center">
             </div>
         </section>
+        <!-- Book lIst Section  -->
         <section id="booksListSection">
+            <!-- Spinner Part  -->
             <div id="loaderDiv" class="d-flex justify-content-center d-none">
                 <div class="spinner-border text-info " role="status">
                     <span class="visually-hidden">Loading...</span>
@@ -61,11 +66,13 @@
                     <span class="visually-hidden">Loading...</span>
                 </div>
             </div>
+            <!-- Total Searched Book Count Part -->
             <div id="totalSearchDiv"></div>
-            <div id="booksListDiv" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-            </div>
+            <!-- Books Shows Part  -->
+            <div id="booksListDiv" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3"></div>
         </section>
     </div>
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>

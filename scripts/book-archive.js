@@ -1,3 +1,4 @@
+// Getting Common Elements Location
 const searchBox = document.getElementById('searchBox')
 const searchButton = document.getElementById('searchButton')
 const booksListDiv = document.getElementById('booksListDiv')
@@ -5,33 +6,51 @@ const loaderDiv = document.getElementById('loaderDiv')
 const noResultDiv = document.getElementById('noResultDiv')
 const totalSearchDiv = document.getElementById('totalSearchDiv')
 
+// Event Triggered Wher Search Button Clicked 
 document.getElementById('searchButton').addEventListener('click', searchBooks)
 
 function searchBooks() {
     let searchText = searchBox.value
+    const url = `https://openlibrary.org/search.json?q=${searchText}`
+    // Clear All Previuos Result 
     clearResult()
-    setSearchSection(0)
-    setLoader(1)
-    fetch(`https://openlibrary.org/search.json?q=${searchText}`)
-        .then(res => res.json())
+    // searchbox and serchButton disabled 
+    disableSearchSection(0)
+    // Enable Spinner Loading 
+    disabledLoader(1)
+
+    fetch(url)
+        .then(handleErrors) // Checked response id OK?
         .then(data => {
-            let searchResultCount = data.docs.length
-            if (searchResultCount) {
-                data.docs.forEach(book => getBooks(book))
-                getTotalSearch(searchResultCount)
+            // Get numFound Property value from api
+            let countBooksFromResponse = data.numFound
+            // Get Total Length of Retrived Array 
+            let totalBooks = data.docs.length
+            if (countBooksFromResponse) {
+                // Retrieved single Object from Array and passed as parameter
+                data.docs?.forEach(book => getBooks(book))
+                // get Total Number of Books found in searching when all data are displayed successfully
+                getTotalSearch(totalBooks, countBooksFromResponse)
             }
             else {
-                setValidation(searchText)
+                // Handle Error, if number of books zero
+                setNoDataValidation(data.q)
             }
         })
+        .catch(error => serverValidation(error)) // if handleErrors method throw an error
         .finally(() => {
-            setLoader(0)
-            setSearchSection(1)
+            // Disable Spinner When Searching Result Retrived 
+            disabledLoader(0)
+            // Enable Serchbox and searchButton, When Searching Result Retrived 
+            disableSearchSection(1)
         })
 }
-
+/**********************Method To Get Each Book Information********************************* */
 const getBooks = singleBook => {
+    // Destructuring 
     let { title_suggest, subtitle, author_name, publisher, first_publish_year, cover_i: cover_image } = singleBook
+    // Get Book Name using Ternary Operator
+    // If title_suggest found then checked if subtitle attribute exists or not
     let bookName = title_suggest ? subtitle
         ? `${title_suggest} -${subtitle}` : `${title_suggest}`
         : subtitle
@@ -48,15 +67,17 @@ const getBooks = singleBook => {
 
     let coverImageMedium = cover_image != undefined
         ? `${cover_image}` : ''
-
+    // Passed Specific Property Value as Parameter to show in Browser 
     showBooks(bookName, authorName, publisherName, firstPublish, coverImageMedium)
 }
-
+/**********************Method To Displayed Books using Template Literals************************** */
 const showBooks = (bookName, authorName, publisher, firstPublish, cover_i) => {
     let coverImageSrc = `https://covers.openlibrary.org/b/id/${cover_i}-M.jpg`
+    // Handle if Image source not found 
     if (!cover_i) {
         coverImageSrc = `https://openlibrary.org/images/icons/avatar_book-sm.png`
     }
+    // Create Element Div
     let colDiv = document.createElement('div')
 
     colDiv.innerHTML =
@@ -71,7 +92,9 @@ const showBooks = (bookName, authorName, publisher, firstPublish, cover_i) => {
                     </p>
                     <p>
                         <small class="text-muted"> 
-            ${firstPublish
+            ${
+        //If firstPublish exist then checked Publisher exists or not 
+        firstPublish
             ? publisher
                 ? `First published in ${firstPublish} by ${publisher} ` : `First published in ${firstPublish}`
             : publisher
@@ -81,10 +104,31 @@ const showBooks = (bookName, authorName, publisher, firstPublish, cover_i) => {
                 </div>
         </div>
        `
+    // Append InerHTML of Created div to parent div
     booksListDiv.appendChild(colDiv)
 }
+/*********************Get Total Serach Found******************* */
+const getTotalSearch = (totatDisplayBooks, actualBooks) => {
+    if (totatDisplayBooks === actualBooks) {
+        totalSearchDiv.innerHTML = `
+        <h3 class="text-info fw-bolder">
+        Total <span class="fw-bold fs-2">${totatDisplayBooks}</span> Books Found 
+        </h3>`
+    }
+    else {
+        totalSearchDiv.innerHTML = `
+        <h3 class="text-info fw-bolder">
+        Showing<span class="fw-bold fs-2">${totatDisplayBooks}</span> Books 
+        From Total<span class="fw-bold fs-2">${actualBooks} Books</span>
+        </h3>`
+    }
+}
 
-const setLoader = action => {
+/**********************************
+ * CLEAR SEARCHBOX, TEXT CONTENT OF DIV, SEARCH FOUND TEXT
+ * DISABLE ENABLE LOADER
+ * T******************************** */
+const disabledLoader = action => {
     action ? loaderDiv.classList.toggle('d-none') : loaderDiv.classList.toggle('d-none', true)
 }
 
@@ -95,18 +139,25 @@ const clearResult = () => {
     totalSearchDiv.textContent = ''
 }
 
-const setSearchSection = action => {
+const disableSearchSection = action => {
     action ? searchBox.toggleAttribute('readonly') : searchBox.toggleAttribute('readonly', true)
     action ? searchButton.classList.toggle('disabled') : searchButton.classList.toggle('disabled', true)
 }
 
-const setValidation = searchText => {
+/********************ERROR HANDLING**************************************** */
+// Handle Server Error, if response not retrived
+let handleErrors = response => {
+    if (!response.ok) throw Error(response.statusText);
+    return response.json();
+}
+// Displayed Server Error
+const serverValidation = (errorText) => {
+    noResultDiv.innerHTML = `<span class="h3 text-warning fw-bold">${errorText}</span>`
+}
+// Displayed message if No Data Found 
+const setNoDataValidation = searchText => {
     noResultDiv.innerHTML = `
     <span class="h3 text-danger fw-bold">No results found.</span>
     <a class="ms-1 h3 text-info" href="/search/inside?q=${searchText}">Search for books containing the phrase "${searchText}"?</a>
     `
-}
-
-const getTotalSearch = (totatBooks) => {
-    totalSearchDiv.innerHTML = `<h3 class="text-info fw-bolder">Total Books Found <span class="fw-bold fs-2">${totatBooks}</span></h3>`
 }
