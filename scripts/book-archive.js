@@ -10,7 +10,8 @@ const totalSearchDiv = document.getElementById('totalSearchDiv')
 document.getElementById('searchButton').addEventListener('click', searchBooks)
 
 function searchBooks() {
-    let searchText = searchBox.value
+    let getSearchText = searchBox.value
+    let searchText = getSearchText.toLowerCase()
     const url = `https://openlibrary.org/search.json?q=${searchText}`
     // Clear All Previuos Result 
     clearResult()
@@ -111,16 +112,16 @@ const showBooks = (bookName, authorName, publisher, firstPublish, cover_i) => {
 const getTotalSearch = (totatDisplayBooks, actualBooks) => {
     if (totatDisplayBooks === actualBooks) {
         totalSearchDiv.innerHTML = `
-        <h3 class="text-info fw-bolder">
-        Total <span class="fw-bold fs-2">${totatDisplayBooks}</span> Books Found 
-        </h3>`
+        <h5 class="text-info fw-bolder">
+        Total <span>${totatDisplayBooks}</span> Books Found 
+        </h5>`
     }
     else {
         totalSearchDiv.innerHTML = `
-        <h3 class="text-info fw-bolder">
-        Showing<span class="fw-bold fs-2">${totatDisplayBooks}</span> Books 
-        From Total<span class="fw-bold fs-2">${actualBooks} Books</span>
-        </h3>`
+        <h5 class="text-info fw-bolder">
+        Showing <span>${totatDisplayBooks}</span> Books 
+        From Total <span>${actualBooks} Books</span>
+        </h5>`
     }
 }
 
