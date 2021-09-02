@@ -112,16 +112,15 @@ const showBooks = (bookName, authorName, publisher, firstPublish, cover_i) => {
 const getTotalSearch = (totatDisplayBooks, actualBooks) => {
     if (totatDisplayBooks === actualBooks) {
         totalSearchDiv.innerHTML = `
-        <h5 class="text-info fw-bolder">
-        Total <span>${totatDisplayBooks}</span> Books Found 
-        </h5>`
+        <small class="text-muted text-sm-center fw-bold">
+        Showing total <span>${totatDisplayBooks}</span> books 
+        </small>`
     }
     else {
         totalSearchDiv.innerHTML = `
-        <h5 class="text-info fw-bolder">
-        Showing <span>${totatDisplayBooks}</span> Books 
-        From Total <span>${actualBooks} Books</span>
-        </h5>`
+        <small class="text-muted text-sm-center fw-bold">
+        Showing <span>${totatDisplayBooks}</span> of <span>${actualBooks}</span> books
+        </small>`
     }
 }
 
