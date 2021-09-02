@@ -10,7 +10,7 @@ document.getElementById('searchButton').addEventListener('click', searchBooks)
 
 
 function searchBooks() {
-    searchText = searchBox.value
+    let searchText = searchBox.value
     setLoader(1)
     setSearchSection(0)
     clearResult()
@@ -21,7 +21,7 @@ function searchBooks() {
                 data.docs.forEach(book => getBooks(book))
             }
             else {
-                setValidation()
+                setValidation(searchText)
             }
         })
         .finally(() => {
@@ -41,10 +41,10 @@ const getBooks = singleBook => {
         ? `${singleBook.author_name[0]}` : 'Unknown Author'
 
     let publisher = singleBook.publisher != undefined
-        ? `${singleBook?.publisher[0]}` : 'Unknown Publisher'
+        ? `${singleBook?.publisher[0]}` : ''
 
     let firstPublish = singleBook.first_publish_year != undefined
-        ? `${singleBook?.first_publish_year}` : 'N/A'
+        ? `${singleBook?.first_publish_year}` : ''
 
     let coverImageMedium = singleBook.cover_i != undefined
         ? `${singleBook.cover_i}` : ''
@@ -54,26 +54,43 @@ const getBooks = singleBook => {
 
 const showBooks = (bookName, authorName, publisher, firstPublish, cover_i) => {
     let coverImageSrc = `https://covers.openlibrary.org/b/id/${cover_i}-M.jpg`
+    let colDiv = document.createElement('div')
+
     if (!cover_i) {
         coverImageSrc = `https://openlibrary.org/images/icons/avatar_book-sm.png`
     }
-    let colDiv = document.createElement('div')
-    colDiv.innerHTML = `
-    <div class="card h-100 bg-light p-1 shadow-lg">
-        <img src="${coverImageSrc}" class="coverImageMedium img-thumbnail card-img-top mx-auto" 
-        alt="images not found" title="${bookName}">
-            <div class="card-body">
-                <h5 class="card-title fw-bold">${bookName}</h5>
-                <p>by
-                    <span class='ms-1 fs-5 fst-italic'>${authorName}</span>
-                </p>
-                <p class="text-muted">
-                    <small>First published in ${firstPublish}</small>
-                </p>
-                <p>${publisher}</p>
-            </div>
-    </div>
-    `
+    if (!firstPublish) {
+        colDiv.innerHTML = `
+        <div class="card h-100 bg-light p-1 shadow-lg">
+            <img src="${coverImageSrc}" class="coverImageMedium img-thumbnail card-img-top mx-auto" 
+            alt="images not found" title="${bookName}">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">${bookName}</h5>
+                    <p>by
+                        <span class='ms-1 fs-5 fst-italic'>${authorName}</span>
+                    </p>
+                    <p>Publisher ${publisher}</p>
+                </div>
+        </div>
+        `
+    }
+    else {
+        colDiv.innerHTML = `
+        <div class="card h-100 bg-light p-1 shadow-lg">
+            <img src="${coverImageSrc}" class="coverImageMedium img-thumbnail card-img-top mx-auto" 
+            alt="No Image" title="${bookName}">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">${bookName}</h5>
+                    <p>by
+                        <span class='ms-1 fs-5 fst-italic'>${authorName}</span>
+                    </p>
+                    <p class="text-muted">
+                        <small>First published in ${firstPublish} ${publisher ? `by ${publisher}` : ``}</small>
+                    </p>
+                </div>
+        </div>
+        `
+    }
     booksListDiv.appendChild(colDiv)
 }
 
@@ -91,9 +108,9 @@ const setSearchSection = action => {
     action ? searchButton.classList.toggle('disabled') : searchButton.classList.toggle('disabled', true)
 }
 
-const setValidation = () => {
+const setValidation = (searchProvided) => {
     noResult.innerHTML = `
     <span class="h3 text-danger fw-bold">No results found.</span>
-    <a class="ms-1 h3 text-info" href="/search/inside?q=${searchText}">Search for books containing the phrase "${searchText}"?</a>
+    <a class="ms-1 h3 text-info" href="/search/inside?q=${searchProvided}">Search for books containing the phrase "${searchProvided}"?</a>
     `
 }
