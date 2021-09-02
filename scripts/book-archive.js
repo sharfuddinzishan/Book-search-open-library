@@ -8,7 +8,7 @@ document.getElementById('searchButton').addEventListener('click', searchBooks)
 function searchBooks() {
     searchText = searchBox.value
 
-    fetch(`http://openlibrary.org/search.json?q=${searchText}`)
+    fetch(`https://openlibrary.org/search.json?q=${searchText}`)
         .then(res => res.json())
         .then(data => getBooks(data.docs))
 }
