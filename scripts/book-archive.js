@@ -13,13 +13,13 @@ function searchBooks() {
     let getSearchText = searchBox.value;
     let searchText = getSearchText.toLowerCase();
     const url = `https://openlibrary.org/search.json?q=${searchText}`;
+
+    // searchbox and serchButton disabled 
+    disableSearchSection(1);
+    // Enable Spinner Loading 
+    disabledLoader(0);
     // Clear All Previuos Result 
     clearResult();
-    // searchbox and serchButton disabled 
-    disableSearchSection(0);
-    // Enable Spinner Loading 
-    disabledLoader(1);
-
     fetch(url)
         .then(handleErrors) // Checked response id OK?
         .then(data => {
@@ -29,6 +29,8 @@ function searchBooks() {
             let totalBooks = data.docs.length;
             if (countBooksFromResponse) {
                 // Retrieved single Object from Array and passed as parameter
+                // Clear All Previuos Result 
+                clearResult();
                 data.docs?.forEach(book => getBooks(book))
                 // get Total Number of Books found in searching when all data are displayed successfully
                 getTotalSearch(totalBooks, countBooksFromResponse);
@@ -41,9 +43,9 @@ function searchBooks() {
         .catch(error => serverValidation(error)) // if handleErrors method throw an error
         .finally(() => {
             // Disable Spinner When Searching Result Retrived 
-            disabledLoader(0);
+            disabledLoader(1);
             // Enable Serchbox and searchButton, When Searching Result Retrived 
-            disableSearchSection(1);
+            disableSearchSection(0);
         })
 }
 /**********************Method To Get Each Book Information********************************* */
@@ -129,7 +131,7 @@ const getTotalSearch = (totatDisplayBooks, actualBooks) => {
  * DISABLE ENABLE LOADER
  * T******************************** */
 const disabledLoader = action => {
-    action ? loaderDiv.classList.toggle('d-none') : loaderDiv.classList.toggle('d-none', true);
+    action ? loaderDiv.classList.toggle('d-none', true) : loaderDiv.classList.toggle('d-none', false);
 };
 
 const clearResult = () => {
@@ -140,8 +142,8 @@ const clearResult = () => {
 }
 
 const disableSearchSection = action => {
-    action ? searchBox.toggleAttribute('readonly') : searchBox.toggleAttribute('readonly', true);
-    action ? searchButton.classList.toggle('disabled') : searchButton.classList.toggle('disabled', true);
+    action ? searchBox.toggleAttribute('readonly', true) : searchBox.toggleAttribute('readonly', false);
+    action ? searchButton.classList.toggle('disabled', true) : searchButton.classList.toggle('disabled', false);
 }
 
 /********************ERROR HANDLING**************************************** */
@@ -158,6 +160,6 @@ const serverValidation = (errorText) => {
 const setNoDataValidation = searchText => {
     noResultDiv.innerHTML = `
     <span class="h3 text-danger fw-bold">No results found.</span>
-    <a class="ms-1 h3 text-info" href="/search/inside?q=${searchText}">Search for books containing the phrase "${searchText}"?</a>
+    <a class="ms-1 h3 text-info" href="https://openlibrary.org/search/inside?q=${searchText}" target="_blank">Search for books containing the phrase "${searchText}"?</a>
     `;
 };
